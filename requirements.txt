@@ -1,1 +1,2 @@
-pyenchant
+pyenchant # for english (works very well)
+nltk # for russian (works reasonably well)
