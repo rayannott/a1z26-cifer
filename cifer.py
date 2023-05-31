@@ -1,11 +1,27 @@
 from itertools import count, product
 from string import ascii_lowercase
+from typing import Literal
 
 import enchant
+ENG_UK = enchant.Dict('en_UK')
+ENG_US = enchant.Dict('en_US')
+
+
+# russian support
+from nltk.stem.snowball import SnowballStemmer
+stemmer = SnowballStemmer('russian')
+with open('ru.txt', encoding='utf-8') as f:
+    RU_WORDS = f.read().split('\n')
+RU_STEMS = {stemmer.stem(word) for word in RU_WORDS}
+RUSSIAN_LETTERS = 'абвгдеёжзийклмнопрстуфхцчшщьыъэюя'
+
 
 # encode tools
 class Encoder:
-    LETTER_MAP = {ch: str(i) for i, ch in enumerate(ascii_lowercase, 1)}
+    def __init__(self, language: Literal['en', 'ru'] = 'en') -> None:
+        self.language = language
+        self.letters = ascii_lowercase if self.language == 'en' else RUSSIAN_LETTERS
+        self.LETTER_MAP = {ch: str(i) for i, ch in enumerate(self.letters, 1)}
 
     def _clean_sentence(self, sentence: str) -> str:
         res = ''
@@ -27,21 +43,26 @@ class Encoder:
             for w in self._clean_sentence(sentence).split()
         )
 
+
 # decode tools
 class Decoder:
-    ENG_UK = enchant.Dict('en_UK')
-    ENG_US = enchant.Dict('en_US')
-    DIGIT_MAP = {i: ch for i, ch in enumerate(ascii_lowercase, 1)}
-
-    def __init__(self) -> None:
+    def __init__(self, language: Literal['en', 'ru'] = 'en') -> None:
+        self.language = language
+        self.letters = ascii_lowercase if self.language == 'en' else RUSSIAN_LETTERS
+        self.DIGIT_MAP = {i: ch for i, ch in enumerate(self.letters, 1)}
         self._reset()
+
+    def word_exists(self, word: str):
+        if self.language == 'en':
+            return ENG_UK.check(word) or ENG_US.check(word)
+        elif self.language == 'ru':
+            return word in RU_WORDS # or stemmer.stem(word) in RU_STEMS
 
     def _reset(self):
         self._failed_words = []
         self._failed_cnt = count()
 
-    @staticmethod
-    def _split_into_letterable(digits: str) -> list[str]:
+    def _split_into_letterable(self, digits: str) -> list[str]:
         '''
         Splits a digit-string into a list of letterable digit-strings.
         Ex.: '1293' -> ['12', '9', '3']
@@ -52,7 +73,7 @@ class Decoder:
         s = ''
         for i in range(len(digits)-1):
             s += digits[i]
-            if int(digits[i:i+2]) > 26:
+            if int(digits[i:i+2]) > len(self.letters):
                 to_ret.append(s)
                 s = ''
         s += digits[-1]
@@ -113,10 +134,10 @@ class Decoder:
         to_ret = [
                 word 
                 for word in ap
-                if self.ENG_UK.check(word) or self.ENG_US.check(word)
+                if self.word_exists(word)
             ]
         if not to_ret:
-            self._failed_words.append(ap)
+            self._failed_words.append(sorted(ap, key=len))
         return to_ret
     
     def decode(self, encoded_sentence: str) -> str:
@@ -129,10 +150,14 @@ class Decoder:
         self._reset()
         def resolve(word):
             options = self._decode_one(word)
-            return '|'.join(options) if options else f'{next(self._failed_cnt)}?'
+            if options:
+                return '|'.join(options)
+            else:
+                failed_index = next(self._failed_cnt)
+                return f'[{self._failed_words[failed_index][0]}]{failed_index}?'
         return ' '.join(
             resolve(word) for word in encoded_sentence.split()
         )
     
-    def get_failed_words_dict(self) -> dict[int, str]:
-        return {i: '|'.join(sorted(failed_word, key=len)) for i, failed_word in enumerate(self._failed_words)}
+    def get_failed_words_dict(self) -> dict[int, list[str]]:
+        return {i: '|'.join(words) for i, words in enumerate(self._failed_words)}
