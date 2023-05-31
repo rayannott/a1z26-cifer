@@ -116,7 +116,7 @@ class Decoder:
                 if self.ENG_UK.check(word) or self.ENG_US.check(word)
             ]
         if not to_ret:
-            self._failed_words.append(ap)
+            self._failed_words.append(sorted(ap, key=len))
         return to_ret
     
     def decode(self, encoded_sentence: str) -> str:
@@ -129,10 +129,14 @@ class Decoder:
         self._reset()
         def resolve(word):
             options = self._decode_one(word)
-            return '|'.join(options) if options else f'{next(self._failed_cnt)}?'
+            if options:
+                return '|'.join(options)
+            else:
+                failed_index = next(self._failed_cnt)
+                return f'[{self._failed_words[failed_index][0]}]{failed_index}?'
         return ' '.join(
             resolve(word) for word in encoded_sentence.split()
         )
     
-    def get_failed_words_dict(self) -> dict[int, str]:
-        return {i: '|'.join(sorted(failed_word, key=len)) for i, failed_word in enumerate(self._failed_words)}
+    def get_failed_words_dict(self) -> dict[int, list[str]]:
+        return {i: '|'.join(words) for i, words in enumerate(self._failed_words)}
