@@ -16,12 +16,13 @@ RU_STEMS = {stemmer.stem(word) for word in RU_WORDS}
 RUSSIAN_LETTERS = 'абвгдеёжзийклмнопрстуфхцчшщьыъэюя'
 
 
-# encode tools
-class Encoder:
+class A1Z26Cifer:
     def __init__(self, language: Literal['en', 'ru'] = 'en') -> None:
         self.language = language
         self.letters = ascii_lowercase if self.language == 'en' else RUSSIAN_LETTERS
+        self.DIGIT_MAP = {i: ch for i, ch in enumerate(self.letters, 1)}
         self.LETTER_MAP = {ch: str(i) for i, ch in enumerate(self.letters, 1)}
+        self._reset()
 
     def _clean_sentence(self, sentence: str) -> str:
         res = ''
@@ -42,15 +43,6 @@ class Encoder:
             self._encode_one(w) 
             for w in self._clean_sentence(sentence).split()
         )
-
-
-# decode tools
-class Decoder:
-    def __init__(self, language: Literal['en', 'ru'] = 'en') -> None:
-        self.language = language
-        self.letters = ascii_lowercase if self.language == 'en' else RUSSIAN_LETTERS
-        self.DIGIT_MAP = {i: ch for i, ch in enumerate(self.letters, 1)}
-        self._reset()
 
     def word_exists(self, word: str):
         if self.language == 'en':
@@ -147,6 +139,13 @@ class Decoder:
         Places '<ID>?' in place of failed words. Possible decodings for
         those words can be looked at using get_failed_words_dict()[ID]
         '''
+        # cleaning the string
+        encoded_sentence_clean = ''
+        for ch in encoded_sentence:
+            if ch.isspace():
+                encoded_sentence_clean += ' '
+            elif ch.isnumeric():
+                encoded_sentence_clean += ch
         self._reset()
         def resolve(word):
             options = self._decode_one(word)
@@ -156,7 +155,7 @@ class Decoder:
                 failed_index = next(self._failed_cnt)
                 return f'[{self._failed_words[failed_index][0]}]{failed_index}?'
         return ' '.join(
-            resolve(word) for word in encoded_sentence.split()
+            resolve(word) for word in encoded_sentence_clean.split()
         )
     
     def get_failed_words_dict(self) -> dict[int, list[str]]:
