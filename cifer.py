@@ -7,12 +7,6 @@ ENG_UK = enchant.Dict('en_UK')
 ENG_US = enchant.Dict('en_US')
 
 
-# russian support
-from nltk.stem.snowball import SnowballStemmer
-stemmer = SnowballStemmer('russian')
-with open('ru.txt', encoding='utf-8') as f:
-    RU_WORDS = f.read().split('\n')
-RU_STEMS = {stemmer.stem(word) for word in RU_WORDS}
 RUSSIAN_LETTERS = 'абвгдеёжзийклмнопрстуфхцчшщьыъэюя'
 
 
@@ -20,6 +14,15 @@ class A1Z26Cifer:
     def __init__(self, language: Literal['en', 'ru'] = 'en') -> None:
         self.language = language
         self.letters = ascii_lowercase if self.language == 'en' else RUSSIAN_LETTERS
+
+        if self.language == 'ru':
+            # russian support
+            from nltk.stem.snowball import SnowballStemmer
+            stemmer = SnowballStemmer('russian')
+            with open('ru.txt', encoding='utf-8') as f:
+                self.RU_WORDS = f.read().split('\n')
+            RU_STEMS = {stemmer.stem(word) for word in self.RU_WORDS}
+
         self.DIGIT_MAP = {i: ch for i, ch in enumerate(self.letters, 1)}
         self.LETTER_MAP = {ch: str(i) for i, ch in enumerate(self.letters, 1)}
         self._reset()
@@ -49,7 +52,7 @@ class A1Z26Cifer:
         if self.language == 'en':
             return ENG_UK.check(word) or ENG_US.check(word)
         elif self.language == 'ru':
-            return word in RU_WORDS # or stemmer.stem(word) in RU_STEMS
+            return word in self.RU_WORDS # or stemmer.stem(word) in RU_STEMS
 
     def _reset(self):
         self._failed_words = []
