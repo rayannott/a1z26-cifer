@@ -25,6 +25,7 @@ class A1Z26Cifer:
         self._reset()
 
     def _clean_sentence(self, sentence: str) -> str:
+        # TODO: keep the punctuation somehow
         res = ''
         for ch in sentence:
             if ch.isspace():
