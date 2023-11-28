@@ -17,6 +17,8 @@ class A1Z26Cifer:
             with open(pathlib.Path('assets') / 'ru.txt', encoding='utf-8') as f:
                 self.RU_WORDS = f.read().split('\n')
             self.letters = 'абвгдеёжзийклмнопрстуфхцчшщьыъэюя'
+        else:
+            raise ValueError('Language must be either "en" or "ru"')
         self.DIGIT_MAP = {i: ch for i, ch in enumerate(self.letters, 1)}
         self.LETTER_MAP = {ch: str(i) for i, ch in enumerate(self.letters, 1)}
         self._reset()

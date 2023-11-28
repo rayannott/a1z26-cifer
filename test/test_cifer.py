@@ -7,6 +7,16 @@ def cifer_english():
     return A1Z26Cifer(language='en')
 
 
+def test_cifer_init_default():
+    cifer = A1Z26Cifer()
+    assert cifer.language == 'en'
+
+
+def test_cifer_init_other():
+    with pytest.raises(ValueError):
+        A1Z26Cifer(language='other')
+
+
 def test_cifer_init(cifer_english: A1Z26Cifer):
     assert cifer_english.language == 'en'
     assert cifer_english.letters == 'abcdefghijklmnopqrstuvwxyz'
