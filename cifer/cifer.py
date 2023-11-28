@@ -121,10 +121,10 @@ class A1Z26Cifer:
         """
         ap = self._all_possible_decodings(encoded_word)
         to_ret = [
-                word 
-                for word in ap
-                if self.word_exists(word)
-            ]
+            word 
+            for word in ap
+            if self.word_exists(word)
+        ]
         if not to_ret:
             self._failed_words.append(sorted(ap, key=len))
         return to_ret
