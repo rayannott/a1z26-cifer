@@ -16,7 +16,6 @@ class A1Z26Cifer:
         elif language == 'ru':
             with open(pathlib.Path('assets') / 'ru.txt', encoding='utf-8') as f:
                 self.RU_WORDS = f.read().split('\n')
-            # self.RU_STEMS = {stemmer.stem(word) for word in RU_WORDS}
             self.letters = 'абвгдеёжзийклмнопрстуфхцчшщьыъэюя'
         self.DIGIT_MAP = {i: ch for i, ch in enumerate(self.letters, 1)}
         self.LETTER_MAP = {ch: str(i) for i, ch in enumerate(self.letters, 1)}
@@ -36,14 +35,14 @@ class A1Z26Cifer:
         """Encodes one word"""
         return ''.join(map(self.LETTER_MAP.get, s))
     
-    def encode(self, sentence: str):
+    def encode(self, sentence: str) -> str:
         """Cleans (removes non-alpha characters) and encodes the whole sentence."""
         return ' '.join(
             self._encode_one(w) 
             for w in self._clean_sentence(sentence).split()
         )
 
-    def word_exists(self, word: str):
+    def word_exists(self, word: str) -> bool:
         if self.language == 'en':
             return ENG_UK.check(word) or ENG_US.check(word)
         elif self.language == 'ru':
@@ -107,7 +106,6 @@ class A1Z26Cifer:
         Applies _transform_combinations_to_words right away.
         Ex.: '1511' -> ['aeaa', 'aek', 'oaa', 'ok']
         """
-        to_ret = []
         letterables = self._split_into_letterable(encoded_word)
         all_word_combinations = [
             self._transform_combinations_to_words(letterable) 
