@@ -33,11 +33,11 @@ class A1Z26Cifer:
         return res
 
     def _encode_one(self, s: str) -> str:
-        '''Encodes one word'''
+        """Encodes one word"""
         return ''.join(map(self.LETTER_MAP.get, s))
     
     def encode(self, sentence: str):
-        '''Cleans (removes non-alpha characters) and encodes the whole sentence.'''
+        """Cleans (removes non-alpha characters) and encodes the whole sentence."""
         return ' '.join(
             self._encode_one(w) 
             for w in self._clean_sentence(sentence).split()
@@ -54,10 +54,10 @@ class A1Z26Cifer:
         self._failed_cnt = count()
 
     def _split_into_letterable(self, digits: str) -> list[str]:
-        '''
+        """
         Splits a digit-string into a list of letterable digit-strings.
         Ex.: '1293' -> ['12', '9', '3']
-        '''
+        """
         if len(digits) == 1:
             return [digits]
         to_ret = []
@@ -72,11 +72,11 @@ class A1Z26Cifer:
         return to_ret
 
     def _get_all_combinations(self, digits: str) -> list[list[int]]:
-        '''
+        """
         Core algorithm that returns a list of all allowed
         partitions of a letterable digit-string.
         Ex.: '15' -> [['1', '5'], ['15']]
-        '''
+        """
         if digits.startswith('0'):
             return []
         if len(digits) == 0:
@@ -92,21 +92,21 @@ class A1Z26Cifer:
         return to_ret
 
     def _transform_combinations_to_words(self, digits: list[list[int]]) -> list[str]:
-        '''
+        """
         digits -- letterable digit-string
         Ex.: '15' -> ['ae', 'o'] (because '1','5' is 'ae'; '15' is 'o')
-        '''
+        """
         return [
             ''.join(map(self.DIGIT_MAP.get, combination))
                 for combination in self._get_all_combinations(digits)
         ]
 
     def _all_possible_decodings(self, encoded_word: str) -> list[str]:
-        '''
+        """
         Returns the product of all possible options for every word part.
         Applies _transform_combinations_to_words right away.
         Ex.: '1511' -> ['aeaa', 'aek', 'oaa', 'ok']
-        '''
+        """
         to_ret = []
         letterables = self._split_into_letterable(encoded_word)
         all_word_combinations = [
@@ -116,11 +116,11 @@ class A1Z26Cifer:
         return [''.join(word_parts) for word_parts in product(*all_word_combinations)]
 
     def _decode_one(self, encoded_word: str) -> list[str]:
-        '''
+        """
         Decodes one word. 
         Returns all decodings which can be found in the corpus (namely, existing words).
         Caches failed words.
-        '''
+        """
         ap = self._all_possible_decodings(encoded_word)
         to_ret = [
                 word 
@@ -132,12 +132,12 @@ class A1Z26Cifer:
         return to_ret
     
     def decode(self, encoded_sentence: str) -> str:
-        '''Decodes one sentence.
+        """Decodes one sentence.
         Returns a string with all options for
         one word separated by "pipe"(|) symbol.
         Places '<ID>?' in place of failed words. Possible decodings for
         those words can be looked at using get_failed_words_dict()[ID]
-        '''
+        """
         # cleaning the string
         encoded_sentence_clean = ''
         for ch in encoded_sentence:
