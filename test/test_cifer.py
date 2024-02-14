@@ -69,17 +69,21 @@ def test_cifer_encode_ru(cifer_russian: A1Z26Cifer):
     assert cifer_russian.encode('привет') == '1718103620'
 
 
+@pytest.mark.skip('Not implemented')
 def test_cifer_decode_one(cifer_english: A1Z26Cifer):
     ...
 
 
+@pytest.mark.skip('Not implemented')
 def test_cifer_decode(cifer_english: A1Z26Cifer):
     ...
 
 
+@pytest.mark.skip('Not implemented')
 def test_cifer_decode__one_ru(cifer_russian: A1Z26Cifer):
     ...
 
 
+@pytest.mark.skip('Not implemented')
 def test_cifer_decode_ru(cifer_russian: A1Z26Cifer):
     ...
